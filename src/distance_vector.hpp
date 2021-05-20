@@ -30,6 +30,14 @@ class DistanceVector {
     }
   }
 
+  void fillWithInfiniteDistance() { distance_.fill(InfiniteDistance); }
+
+  auto begin() { return distance_.begin(); }
+  auto begin() const { return distance_.begin(); }
+
+  auto end() { return distance_.end(); }
+  auto end() const { return distance_.end(); }
+
   std::array<int, NodeCount> distance_;
 };
 
@@ -40,6 +48,21 @@ class Node {
 
   Node(DistanceVector<NodeCount, InfiniteDistance> &direct_distance)
       : direct_distance_(direct_distance) {}
+
+  void setDirectDv(const std::vector<int> &vec) {
+    direct_distance_.setDistanceVector(vec);
+  }
+
+  void initDvBasedOnDirectDv() {
+    std::for_each(
+        dv_of_neighbors_.begin(), dv_of_neighbors_.end(),
+        [](DistanceVector<NodeCount, InfiniteDistance> &distance_vector) {
+          distance_vector.fillWithInfiniteDistance();
+        });
+
+    std::copy(direct_distance_.begin(), direct_distance_.end(),
+              dv_of_neighbors_[id_].begin());
+  }
 
   void sendDvToNeighbors(
       std::array<Node<NodeCount, InfiniteDistance>, NodeCount> &neighbors,
@@ -54,22 +77,22 @@ class Node {
       const size_t id_v,
       const DistanceVector<NodeCount, InfiniteDistance> &dv_of_v,
       bool &has_value_changed) {
-    for (size_t y = 0; y < NodeCount; ++y) {
-      auto &dx_y = dv_of_neighbors_[id_].distance_[y];
-      auto dv_y = dv_of_v.distance_[y];
-      auto cx_v = direct_distance_.distance_[id_v];
-      if (dx_y == InfiniteDistance &&
-          (cx_v == InfiniteDistance || dv_y == InfiniteDistance)) {
-        continue;
-      } else if (dx_y == InfiniteDistance) {
-        dx_y = cx_v + dv_y;
-        has_value_changed = true;
-      } else if (dx_y != InfiniteDistance && cx_v != InfiniteDistance &&
-                 dv_y != InfiniteDistance) {
-        dx_y = std::min(cx_v + dv_y, dx_y);
-        has_value_changed = true;
-      }
-    }
+    // for (size_t y = 0; y < NodeCount; ++y) {
+    //   auto &dx_y = dv_of_neighbors_[id_].distance_[y];
+    //   auto dv_y = dv_of_v.distance_[y];
+    //   auto cx_v = direct_distance_.distance_[id_v];
+    //   if (dx_y == InfiniteDistance &&
+    //       (cx_v == InfiniteDistance || dv_y == InfiniteDistance)) {
+    //     continue;
+    //   } else if (dx_y == InfiniteDistance) {
+    //     dx_y = cx_v + dv_y;
+    //     has_value_changed = true;
+    //   } else if (dx_y != InfiniteDistance && cx_v != InfiniteDistance &&
+    //              dv_y != InfiniteDistance) {
+    //     dx_y = std::min(cx_v + dv_y, dx_y);
+    //     has_value_changed = true;
+    //   }
+    // }
   }
 
   DistanceVector<NodeCount, InfiniteDistance> direct_distance_;
@@ -83,7 +106,7 @@ class Node {
 template <size_t NodeCount, int InfiniteDistance>
 class DistanceVectorSystem {
  public:
-  DistanceVectorSystem() { initNodes(); }
+  // DistanceVectorSystem() { initNodes(); }
 
   DistanceVectorSystem(
       std::array<Node<NodeCount, InfiniteDistance>, NodeCount> &nodes)
@@ -111,13 +134,8 @@ class DistanceVectorSystem {
   void initNodes() {
     for (size_t id = 0; id < nodes_.size(); ++id) {
       nodes_[id].id_ = id;
-      for (size_t neighbor_id = 0; neighbor_id < nodes_.size(); ++neighbor_id) {
-        std::copy(nodes_[neighbor_id].direct_distance_.distance_.begin(),
-                  nodes_[neighbor_id].direct_distance_.distance_.end(),
-                  nodes_[id].dv_of_neighbors_[neighbor_id].distance_.begin());
-        // nodes_[id].dv_of_neighbors_[neighbor_id].distance_ =
-        //     nodes_[neighbor_id].direct_distance_;
-        // nodes_[id].neighbors[neighbor_id] = &nodes_[neighbor_id]
+      for (auto &node : nodes_) {
+        node.initDvBasedOnDirectDv();
       }
     }
   }

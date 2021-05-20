@@ -7,15 +7,46 @@ using namespace rco::dv;
 
 #include <gtest/gtest.h>
 
-TEST(DistanceVector, test) {
+TEST(DistanceVector, test1) {
+  constexpr int kNodeCount = 3;
+  constexpr int kIFDis = -1;
+  std::array<Node<kNodeCount, kIFDis>, kNodeCount> nodes;
+  nodes[0].setDirectDv({0, 2, 3}); // A
+  nodes[1].setDirectDv({2, 0, 4}); // B
+  nodes[2].setDirectDv({3, 4, 0}); // C
+
+  DistanceVectorSystem<kNodeCount, kIFDis> dv_sys(nodes);
+
+	auto iteration_count = dv_sys.run();
+
+	EXPECT_GT(iteration_count, 0);
+}
+
+TEST(DistanceVector, test2) {
+  constexpr int kNodeCount = 4;
+  constexpr int kIFDis = -1;
+  std::array<Node<kNodeCount, kIFDis>, kNodeCount> nodes;
+  nodes[0].setDirectDv({0, 2, kIFDis, 5}); // A
+  nodes[1].setDirectDv({2, 0, 3, kIFDis}); // B
+  nodes[2].setDirectDv({kIFDis, 3, 0, 4}); // C
+  nodes[3].setDirectDv({5, kIFDis, 4, 0}); // D
+
+  DistanceVectorSystem<kNodeCount, kIFDis> dv_sys(nodes);
+
+	auto iteration_count = dv_sys.run();
+
+	EXPECT_GT(iteration_count, 0);
+}
+
+TEST(DistanceVector, test3) {
   constexpr int kNodeCount = 5;
   constexpr int kIFDis = -1;
   std::array<Node<kNodeCount, kIFDis>, kNodeCount> nodes;
-  nodes[0].direct_distance_.setDistanceVector({0, 7, kIFDis, kIFDis, 1});
-  nodes[1].direct_distance_.setDistanceVector({7, 0, 1, kIFDis, 8});
-  nodes[2].direct_distance_.setDistanceVector({0, 7, kIFDis, kIFDis, 1});
-  nodes[3].direct_distance_.setDistanceVector({0, 7, kIFDis, kIFDis, 1});
-  nodes[4].direct_distance_.setDistanceVector({0, 7, kIFDis, kIFDis, 1});
+  nodes[0].setDirectDv({0, 7, kIFDis, kIFDis, 1});
+  nodes[1].setDirectDv({7, 0, 1, kIFDis, 8});
+  nodes[2].setDirectDv({0, 7, kIFDis, kIFDis, 1});
+  nodes[3].setDirectDv({0, 7, kIFDis, kIFDis, 1});
+  nodes[4].setDirectDv({0, 7, kIFDis, kIFDis, 1});
   // {0, 7, kIFDis, kIFDis, 1},
   // {7, 0, 1, kIFDis, 8},
   // {kIFDis, 1, 0, 2, kIFDis},

@@ -13,4 +13,4 @@ For each neighbor v, x maintains Dv = [Dv(y): y є N ]
 
 - Each node v periodically sends Dv to its neighbors
 And neighbors(x) update their own distance vectors
-Dx(y) ← minv{c(x,v) + Dv(y), Dx(y)} for each node y ε N
+Dx(y) ← minv{c(x,v) + Dv(y)} for each node y ε N
