@@ -14,10 +14,10 @@ namespace rco {
 
 namespace dv {
 
-template <size_t NodeCount, int InfiniteDistance>
+template <size_t NodeCount, int INF>
 class DistanceVector {
  public:
-  DistanceVector() { distance_.fill(InfiniteDistance); }
+  DistanceVector() { distance_.fill(INF); }
 
   explicit DistanceVector(std::array<int, NodeCount> &distance)
       : distance_(distance) {}
@@ -32,7 +32,7 @@ class DistanceVector {
     }
   }
 
-  void fillWithInfiniteDistance() { distance_.fill(InfiniteDistance); }
+  void fillWithInfiniteDistance() { distance_.fill(INF); }
 
   auto begin() { return distance_.begin(); }
   auto begin() const { return distance_.begin(); }
@@ -40,16 +40,18 @@ class DistanceVector {
   auto end() { return distance_.end(); }
   auto end() const { return distance_.end(); }
 
+  auto &operator[](size_t idx) noexcept { return distance_[idx]; }
+  const auto &operator[](size_t idx) const noexcept { return distance_[idx]; }
+
   std::array<int, NodeCount> distance_;
 };
 
-template <size_t NodeCount, int InfiniteDistance>
+template <size_t NodeCount, int INF>
 class Node {
  public:
   Node() : id_(std::numeric_limits<size_t>::max()) {}
 
-  explicit Node(
-      const DistanceVector<NodeCount, InfiniteDistance> &direct_distance)
+  explicit Node(const DistanceVector<NodeCount, INF> &direct_distance)
       : id_(std::numeric_limits<size_t>::max()),
         direct_distance_(direct_distance) {}
 
@@ -72,25 +74,23 @@ class Node {
     for (size_t y = 0; y < NodeCount; ++y) {
       bool has_dx_y_changed = false;
       size_t x = id_;
-      int min_dx_y = dv_of_neighbors_[x].distance_[y];
+      int min_dx_y = dv_of_neighbors_[x][y];
       for (size_t v = 0; v < NodeCount; ++v) {
         auto computeDxvY = [this, y, v]() {
-          if (direct_distance_.distance_[v] == InfiniteDistance ||
-              dv_of_neighbors_[v].distance_[y] == InfiniteDistance) {
-            return InfiniteDistance;
+          if (direct_distance_[v] == INF || dv_of_neighbors_[v][y] == INF) {
+            return INF;
           } else {
-            return direct_distance_.distance_[v] +
-                   dv_of_neighbors_[v].distance_[y];
+            return direct_distance_[v] + dv_of_neighbors_[v][y];
           }
         };
         int dx_v_y = computeDxvY();
         if (min_dx_y == dx_v_y) {
           continue;
         }
-        if (min_dx_y == InfiniteDistance && dx_v_y != InfiniteDistance) {
+        if (min_dx_y == INF && dx_v_y != INF) {
           min_dx_y = dx_v_y;
           has_dx_y_changed = true;
-        } else if (min_dx_y != InfiniteDistance && dx_v_y != InfiniteDistance) {
+        } else if (min_dx_y != INF && dx_v_y != INF) {
           if (dx_v_y < min_dx_y) {
             min_dx_y = std::min(min_dx_y, dx_v_y);
             has_dx_y_changed = true;
@@ -99,41 +99,39 @@ class Node {
       }
 
       if (has_dx_y_changed) {
-        dv_of_neighbors_[x].distance_[y] = min_dx_y;
+        dv_of_neighbors_[x][y] = min_dx_y;
         has_value_changed = true;
       }
     }
   }
 
   void sendDvToNeighbors(
-      std::array<Node<NodeCount, InfiniteDistance>, NodeCount> &neighbors) {
+      std::array<Node<NodeCount, INF>, NodeCount> &neighbors) {
     for (auto &it : neighbors) {
       it.updateDvOfNodeX(this->id_, this->dv_of_neighbors_[id_]);
     }
   }
 
-  void updateDvOfNodeX(
-      const size_t id_x,
-      const DistanceVector<NodeCount, InfiniteDistance> &dv_of_x) {
+  void updateDvOfNodeX(const size_t id_x,
+                       const DistanceVector<NodeCount, INF> &dv_of_x) {
     std::copy(dv_of_x.begin(), dv_of_x.end(), dv_of_neighbors_[id_x].begin());
   }
 
   size_t id_;
 
-  DistanceVector<NodeCount, InfiniteDistance> direct_distance_;
-  std::array<DistanceVector<NodeCount, InfiniteDistance>, NodeCount>
-      dv_of_neighbors_;
+  DistanceVector<NodeCount, INF> direct_distance_;
+  std::array<DistanceVector<NodeCount, INF>, NodeCount> dv_of_neighbors_;
 
   // std::array<Node *, NodeCount> neighbors_;
 };
 
-template <size_t NodeCount, int InfiniteDistance>
+template <size_t NodeCount, int INF>
 class DistanceVectorSystem {
  public:
   // DistanceVectorSystem() { initNodes(); }
 
   explicit DistanceVectorSystem(
-      std::array<Node<NodeCount, InfiniteDistance>, NodeCount> &nodes)
+      std::array<Node<NodeCount, INF>, NodeCount> &nodes)
       : nodes_(nodes) {
     initNodes();
   }
@@ -157,7 +155,7 @@ class DistanceVectorSystem {
     return iteration_count;
   }
 
-  std::array<Node<NodeCount, InfiniteDistance>, NodeCount> nodes_;
+  std::array<Node<NodeCount, INF>, NodeCount> nodes_;
 
  private:
   void initNodes() {
