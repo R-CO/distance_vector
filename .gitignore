@@ -38,3 +38,5 @@ build/
 # .vscode
 .vscode/
 
+# cppcheck
+cppcheck/distance_vector-cppcheck-build-dir/

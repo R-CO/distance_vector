@@ -42,11 +42,11 @@ TEST(DistanceVector, test3) {
   constexpr int kNodeCount = 5;
   constexpr int kIFDis = -1;
   std::array<Node<kNodeCount, kIFDis>, kNodeCount> nodes;
-  nodes[0].setDirectDv({0, 7, kIFDis, kIFDis, 1});
-  nodes[1].setDirectDv({7, 0, 1, kIFDis, 8});
-  nodes[2].setDirectDv({0, 7, kIFDis, kIFDis, 1});
-  nodes[3].setDirectDv({0, 7, kIFDis, kIFDis, 1});
-  nodes[4].setDirectDv({0, 7, kIFDis, kIFDis, 1});
+  nodes[0].setDirectDv({0, 7, kIFDis, kIFDis, 1}); // A
+  nodes[1].setDirectDv({7, 0, 1, kIFDis, 8}); // B
+  nodes[2].setDirectDv({kIFDis, 1, 0, 2, kIFDis}); // C
+  nodes[3].setDirectDv({kIFDis, kIFDis, 2, 0, 2}); // D
+  nodes[4].setDirectDv({1, 8, kIFDis, 2, 0}); // E
   // {0, 7, kIFDis, kIFDis, 1},
   // {7, 0, 1, kIFDis, 8},
   // {kIFDis, 1, 0, 2, kIFDis},
