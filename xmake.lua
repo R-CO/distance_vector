@@ -8,6 +8,7 @@
 set_languages("c11", "cxx17")
 if is_mode("debug") then
     set_symbols("debug")
+    set_optimize("none")
 else
     set_optimize("faster")
 end
