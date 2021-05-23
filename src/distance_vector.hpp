@@ -92,7 +92,7 @@ class Node {
           has_dx_y_changed = true;
         } else if (min_dx_y != INF && dx_v_y != INF) {
           if (dx_v_y < min_dx_y) {
-            min_dx_y = std::min(min_dx_y, dx_v_y);
+            min_dx_y = dx_v_y;
             has_dx_y_changed = true;
           }
         }
@@ -121,8 +121,6 @@ class Node {
 
   DistanceVector<NodeCount, INF> direct_distance_;
   std::array<DistanceVector<NodeCount, INF>, NodeCount> dv_of_neighbors_;
-
-  // std::array<Node *, NodeCount> neighbors_;
 };
 
 template <size_t NodeCount, int INF>
