@@ -14,6 +14,51 @@ namespace rco {
 
 namespace dv {
 
+template <typename Ty, Ty INF>
+class Distance {
+ public:
+  Distance() : val_(INF) {}
+  explicit Distance(const Ty &v) : val_(v) {}
+
+  auto &operator=(const Ty &val) {
+    val_ = val;
+    return (*this);
+  }
+
+  inline bool operator==(const Distance<Ty, INF> &v) const {
+    return this->val_ == v.val_;
+  }
+
+  inline bool operator!=(const Distance<Ty, INF> &v) const {
+    return !(*this == v);
+  }
+
+  inline bool operator<(const Distance<Ty, INF> &v) const {
+    if (this->val_ == INF && v.val_ != INF) {
+      return true;
+    } else if (this->val_ != INF && v.val_ != INF) {
+      if (this->val_ < v.val_) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  inline bool operator>(const Distance<Ty, INF> &v) const { return v < *this; }
+
+  inline bool operator<=(const Distance<Ty, INF> &v) const {
+    return !(*this > v);
+  }
+
+  inline bool operator>=(const Distance<Ty, INF> &v) const {
+    return !(v < *this);
+  }
+
+ private:
+  Ty val_;
+};
+
 template <size_t NodeCount, int INF>
 class DistanceVector {
  public:
@@ -40,7 +85,10 @@ class DistanceVector {
   auto end() { return distance_.end(); }
   auto end() const { return distance_.end(); }
 
-  auto &operator[](size_t idx) noexcept { return distance_[idx]; }
+  auto &operator[](size_t idx) noexcept {
+    return const_cast<int &>(
+        static_cast<const DistanceVector<NodeCount, INF> &>(*this)[idx]);
+  }
   const auto &operator[](size_t idx) const noexcept { return distance_[idx]; }
 
   std::array<int, NodeCount> distance_;

@@ -7,6 +7,13 @@ using namespace rco::dv;
 
 #include <gtest/gtest.h>
 
+TEST(Distance, int_type_test_less_than) {
+	Distance<int, -1> d_1{1};
+	Distance<int, -1> d_2{2};
+
+	EXPECT_LT(d_1, d_2);
+}
+
 TEST(DistanceVector, test1) {
   constexpr int kNodeCount = 3;
   constexpr int kIFDis = -1;
