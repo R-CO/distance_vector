@@ -31,15 +31,15 @@ class Distance {
     return (*this);
   }
 
-  inline bool operator==(const Distance<Ty, INF> &v) const {
+  inline auto operator==(const Distance<Ty, INF> &v) const {
     return this->val_ == v.val_;
   }
 
-  inline bool operator!=(const Distance<Ty, INF> &v) const {
+  inline auto operator!=(const Distance<Ty, INF> &v) const {
     return !(*this == v);
   }
 
-  inline bool operator<(const Distance<Ty, INF> &v) const {
+  inline auto operator<(const Distance<Ty, INF> &v) const {
     if (this->val_ != INF && v.val_ == INF) {
       return true;
     } else if (this->val_ != INF && v.val_ != INF) {
@@ -51,17 +51,17 @@ class Distance {
     return false;
   }
 
-  inline bool operator>(const Distance<Ty, INF> &v) const { return v < *this; }
+  inline auto operator>(const Distance<Ty, INF> &v) const { return v < *this; }
 
-  inline bool operator<=(const Distance<Ty, INF> &v) const {
+  inline auto operator<=(const Distance<Ty, INF> &v) const {
     return !(*this > v);
   }
 
-  inline bool operator>=(const Distance<Ty, INF> &v) const {
+  inline auto operator>=(const Distance<Ty, INF> &v) const {
     return !(v < *this);
   }
 
-  auto operator+(const Distance<Ty, INF> &v) {
+  inline auto operator+(const Distance<Ty, INF> &v) {
     return Distance<Ty, INF>{this->val_ + v.val_};
   }
 
