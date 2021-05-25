@@ -21,11 +21,16 @@ class Distance {
   explicit Distance(const Ty &v) : val_(v) {}
 
   auto &getValue() {
-    return static_cast<const Distance<Ty, INF> &>(*this).getValue();
+    return const_cast<Distance<Ty, INF> &>(
+        static_cast<const Distance<Ty, INF> &>(*this).getValue());
   }
 
   auto &getValue() const { return this->val_; }
 
+  auto &operator=(const Distance<Ty, INF> &obj) {
+    this->val_ = obj.val_;
+    return *this;
+  }
   auto &operator=(const Ty &val) {
     val_ = val;
     return (*this);
@@ -62,7 +67,19 @@ class Distance {
   }
 
   inline auto operator+(const Distance<Ty, INF> &v) {
+    if (this->val_ == INF || v.val_ == INF) {
+      return Distance<Ty, INF>{INF};
+    }
+
     return Distance<Ty, INF>{this->val_ + v.val_};
+  }
+
+  inline auto operator-(const Distance<Ty, INF> &v) {
+    if (this->val_ == INF || v.val_ == INF) {
+      return Distance<Ty, INF>{INF};
+    }
+
+    return Distance<Ty, INF>{this->val_ - v.val_};
   }
 
  private:
@@ -107,6 +124,7 @@ class DistanceVector {
   }
   const auto &operator[](size_t idx) const noexcept { return distance_[idx]; }
 
+ private:
   std::array<Distance<Ty, INF>, NodeCount> distance_;
 };
 
@@ -118,6 +136,10 @@ class Node {
   explicit Node(const DistanceVector<Ty, NodeCount, INF> &direct_distance)
       : id_(std::numeric_limits<size_t>::max()),
         direct_distance_(direct_distance) {}
+
+  void setId(const size_t id) { this->id_ = id; }
+
+  auto getId() const { return this->id_; }
 
   void setDirectDv(const std::vector<int> &vec) {
     direct_distance_.setDistanceVector(vec);
@@ -175,6 +197,7 @@ class Node {
     std::copy(dv_of_x.begin(), dv_of_x.end(), dv_of_neighbors_[id_x].begin());
   }
 
+ private:
   size_t id_;
 
   DistanceVector<Ty, NodeCount, INF> direct_distance_;
@@ -216,7 +239,7 @@ class DistanceVectorSystem {
  private:
   void initNodes() {
     for (size_t id = 0; id < nodes_.size(); ++id) {
-      nodes_[id].id_ = id;
+      nodes_[id].setId(id);
       nodes_[id].initDvBasedOnDirectDv();
     }
 
